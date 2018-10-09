@@ -78,7 +78,6 @@
                 <slot name="table_append"/>
             </template>
         </v-block>
-
     </div>
 </template>
 
