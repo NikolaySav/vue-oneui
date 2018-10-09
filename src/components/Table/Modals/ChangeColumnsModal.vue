@@ -24,7 +24,7 @@
         data: () => ({
             opened: false,
             selected: [],
-            saveColumns: () => {
+            updateColumns: () => {
             },
             columns: []
         }),
@@ -49,7 +49,7 @@
                     };
                 });
 
-                this.saveColumns(columns);
+                this.updateColumns(columns);
                 this.onClose();
             },
             showModal() {
@@ -59,9 +59,9 @@
             }
         },
         mounted() {
-            EventBus.$on(CHANGE_COLUMNS_MODAL_SHOW, (columns, saveColumns) => {
+            EventBus.$on(CHANGE_COLUMNS_MODAL_SHOW, (columns, updateColumns) => {
                 this.columns = columns;
-                this.saveColumns = saveColumns;
+                this.updateColumns = updateColumns;
                 this.showModal();
             });
         },

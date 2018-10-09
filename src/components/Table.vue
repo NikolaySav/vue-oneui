@@ -13,6 +13,11 @@
         <v-block :title="blockTitle" :loading="isLoading" :allow-fullscreen="true" :has-errors="hasErrors">
             <template slot="options" slot-scope="props">
                 <slot name="block-options"/>
+                <li v-if="options.changeColumnsModal">
+                    <button type="button" v-tooltip="$t('change_columns_tooltip')" @click="showChangeColumnsModal">
+                        <i class="si si-list"/>
+                    </button>
+                </li>
                 <export-csv v-if="options.exportCSV" :selector="`#${props.blockId} .table`" :filename="filename"/>
             </template>
 
@@ -73,6 +78,7 @@
                 <slot name="table_append"/>
             </template>
         </v-block>
+
     </div>
 </template>
 
@@ -89,11 +95,19 @@
     import Pagination from './Table/Paginators/Factory';
     import typeDate from './mixins/type-date';
     import ExportCsv from './Table/ExportCSV';
+    import ChangeColumnsModal from './Table/Modals/ChangeColumnsModal';
     import resolveRouteTitle from '../utils/routeTitleResolver';
+    import EventBus from '../plugins/events/bus';
+    import {CHANGE_COLUMNS_MODAL_SHOW} from '../plugins/events';
 
     export default {
-        components: {Vuetable, VFilter, VBlock, Pagination, ExportCsv},
+        components: {Vuetable, VFilter, VBlock, Pagination, ExportCsv, ChangeColumnsModal},
         props: {
+            saveModalColumns: {
+                type: Function,
+                default: () => {
+                },
+            },
             apiMode: {
                 type: Boolean,
                 default: true
@@ -130,7 +144,8 @@
                 type: Object,
                 default() {
                     return {
-                        exportCSV: true
+                        exportCSV: true,
+                        changeColumnsModal: false,
                     };
                 }
             },
@@ -186,6 +201,12 @@
                 originalFilters: {},
                 filtersModel: {},
                 filtersResolved: false,
+                tableColumns: this.columns
+            }
+        },
+        watch: {
+            columns(newValue) {
+                this.tableColumns = newValue;
             }
         },
         computed: {
@@ -193,7 +214,7 @@
                 return 'table-block-' + this._uid;
             },
             fields() {
-                this.columns.forEach(column => {
+                this.tableColumns.forEach(column => {
                     if (column.type) {
                         if (typeof column.type === 'string') {
                             switch (column.type) {
@@ -230,7 +251,7 @@
                     this.$refs.vuetable.normalizeFields();
                 });
 
-                return this.columns;
+                return this.tableColumns;
             },
             appendParams() {
                 let params = {};
@@ -257,6 +278,13 @@
             this.resolveFilters();
         },
         methods: {
+            showChangeColumnsModal() {
+                EventBus.$emit(CHANGE_COLUMNS_MODAL_SHOW, this.tableColumns, this.updateColumns);
+            },
+            updateColumns(columns) {
+                this.tableColumns = columns;
+                this.$emit('columns-changed', this.tableColumns);
+            },
             httpFetch(apiUrl, httpOptions) {
                 return this.$http.get(apiUrl, httpOptions);
             },
@@ -357,10 +385,12 @@
         i18n: {
             messages: {
                 en: {
+                    change_columns_tooltip: 'Change columns',
                     no_data: 'No data available',
                     pagination_per_page: 'Records per page',
                 },
                 ru: {
+                    change_columns_tooltip: 'Изменить набор столбцов',
                     no_data: 'Нет данных',
                     pagination_per_page: 'Показать записей',
                 },
