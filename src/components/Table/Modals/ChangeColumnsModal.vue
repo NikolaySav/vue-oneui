@@ -1,5 +1,5 @@
 <template>
-    <oneui-modal :title="$t('title')" :show="opened" @close="onClose">
+    <modal :title="$t('title')" :show="opened" @close="onClose">
         <template slot="body">
             <group-checkbox :items="items" v-model="selected" v-if="selected.length > 0"/>
         </template>
@@ -7,17 +7,19 @@
             <button type="button" class="btn btn-default" @click="onClose">{{ $t('cancel') }}</button>
             <button type="button" class="btn btn-primary" @click="onSave">{{ $t('submit') }}</button>
         </template>
-    </oneui-modal>
+    </modal>
 </template>
 
 <script>
     import EventBus from '../../../plugins/events/bus';
     import {CHANGE_COLUMNS_MODAL_SHOW} from '../../../plugins/events';
-    import GroupCheckbox from '../../../components/Base/GroupCheckbox';
+    import GroupCheckbox from '../../Base/GroupCheckbox';
+    import Modal from '../../Modal';
 
     export default {
         components: {
-            GroupCheckbox
+            GroupCheckbox,
+            Modal,
         },
         data: () => ({
             opened: false,
