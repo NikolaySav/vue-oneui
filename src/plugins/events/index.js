@@ -1,0 +1,1 @@
+export const CHANGE_COLUMNS_MODAL_SHOW = 'change-columns-modal-show';
